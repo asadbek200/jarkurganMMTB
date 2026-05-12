@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="uz" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Hujjatlar — Admin</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--green:#1a6b3c;--green3:#e6f5ec;--gold:#c8a227;--text:#1a2a1e;--text3:#6b8c73;--white:#fff;--bg:#f0f7f3;--border:#d4e8db;--sidebar:240px}
+body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar);background:var(--green);position:fixed;top:0;left:0;height:100vh;display:flex;flex-direction:column;z-index:10}
+.sb-logo{padding:1.2rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.12)}
+.sb-logo strong{display:block;font-size:14px;font-weight:700;color:#fff}
+.sb-logo span{font-size:11px;color:rgba(255,255,255,.65)}
+.sb-menu{padding:.8rem 0;flex:1}
+.sb-menu a{display:flex;align-items:center;gap:10px;padding:.7rem 1.5rem;color:rgba(255,255,255,.82);font-size:14px;text-decoration:none;transition:background .18s}
+.sb-menu a:hover,.sb-menu a.active{background:rgba(255,255,255,.14);color:#fff}
+.sb-menu a .ic{font-size:18px;width:22px;text-align:center}
+.sb-bottom{padding:1rem 1.5rem;border-top:1px solid rgba(255,255,255,.12)}
+.sb-bottom a{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.7);font-size:13px;text-decoration:none}
+.main{margin-left:var(--sidebar);flex:1}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:.8rem 1.5rem}
+.topbar h1{font-size:17px;font-weight:700}
+.content{padding:1.5rem}
+.flash{background:#e6f5ec;color:#1a6b3c;border:1px solid #b2dfcc;border-radius:10px;padding:10px 14px;font-size:14px;margin-bottom:1rem}
+.btn{display:inline-block;padding:9px 18px;border-radius:20px;font-size:13px;font-weight:700;border:none;cursor:pointer;text-decoration:none}
+.btn-green{background:var(--green);color:#fff}
+.btn-red{background:#e53935;color:#fff}
+.btn-sm{padding:5px 12px;font-size:12px;border-radius:12px}
+.form-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.5rem;margin-bottom:1.5rem}
+.form-card h2{font-size:15px;font-weight:700;margin-bottom:1.2rem;color:var(--green)}
+.fg{display:flex;flex-direction:column;gap:4px;margin-bottom:1rem}
+label{font-size:13px;font-weight:600;color:var(--text3)}
+input,select,textarea{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;outline:none;background:#fff}
+input:focus,select:focus{border-color:var(--green)}
+.table-card{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;padding:.7rem 1.2rem;border-bottom:1px solid var(--border);background:#fafcfa}
+td{padding:.75rem 1.2rem;font-size:14px;border-bottom:1px solid #f0f5f1;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f8fdf9}
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="sb-logo"><strong>jarkurganMMTB.uz</strong><span>Admin panel</span></div>
+  <div class="sb-menu">
+    <a href="/admin/dashboard"><span class="ic">📊</span> Dashboard</a>
+    <a href="/admin/news"><span class="ic">📰</span> Yangiliklar</a>
+    <a href="/admin/schools"><span class="ic">🏫</span> Maktablar</a>
+    <a href="/admin/documents" class="active"><span class="ic">📄</span> Hujjatlar</a>
+    <a href="/admin/contacts"><span class="ic">📩</span> Murojaatlar</a>
+    <a href="/admin/settings"><span class="ic">⚙️</span> Sozlamalar</a>
+  </div>
+  <div class="sb-bottom"><a href="/"><span>🌐</span> Saytni ko'rish</a></div>
+  <div class="sb-bottom"><a href="/logout"><span>🚪</span> Chiqish</a></div>
+</div>
+<div class="main">
+  <div class="topbar"><h1>Hujjatlar</h1></div>
+  <div class="content">
+    <div class="flash" th:if="${success}" th:text="${success}"></div>
+    <div class="form-card">
+      <h2>📎 Yangi hujjat yuklash</h2>
+      <form th:action="@{/admin/documents/upload}" method="post" enctype="multipart/form-data">
+        <div class="fg"><label>Sarlavha *</label><input type="text" name="title" required placeholder="Hujjat nomi"/></div>
+        <div class="fg"><label>Tavsif</label><input type="text" name="description" placeholder="Qisqacha tavsif"/></div>
+        <div class="fg">
+          <label>Kategoriya</label>
+          <select name="category">
+            <option th:each="c : ${categories}" th:value="${c}" th:text="${c}"></option>
+          </select>
+        </div>
+        <div class="fg"><label>Fayl *</label><input type="file" name="file" required/></div>
+        <button type="submit" class="btn btn-green">💾 Yuklash</button>
+      </form>
+    </div>
+    <div class="table-card">
+      <table>
+        <tr><th>Sarlavha</th><th>Kategoriya</th><th>Fayl nomi</th><th>Sana</th><th>Amal</th></tr>
+        <tr th:if="${#lists.isEmpty(docs)}">
+          <td colspan="5" style="text-align:center;color:#6b8c73;padding:2rem">Hujjatlar yo'q</td>
+        </tr>
+        <tr th:each="d : ${docs}">
+          <td th:text="${d.title}">Sarlavha</td>
+          <td th:text="${d.category}">Kat</td>
+          <td><a th:href="@{/uploads/{f}(f=${d.filePath})}" target="_blank" th:text="${d.fileName}" style="color:var(--green)">fayl</a></td>
+          <td th:text="${#temporals.format(d.uploadedAt,'dd.MM.yyyy')}">Sana</td>
+          <td>
+            <form th:action="@{/admin/documents/delete/{id}(id=${d.id})}" method="post" onsubmit="return confirm('O\'chirasizmi?')">
+              <button type="submit" class="btn btn-red btn-sm">🗑 O'chir</button>
+            </form>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+</body>
+</html>

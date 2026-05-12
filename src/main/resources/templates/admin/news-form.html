@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="uz" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Yangilik — Admin</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--green:#1a6b3c;--green3:#e6f5ec;--gold:#c8a227;--text:#1a2a1e;--text3:#6b8c73;--white:#fff;--bg:#f0f7f3;--border:#d4e8db;--sidebar:240px}
+body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar);background:var(--green);position:fixed;top:0;left:0;height:100vh;display:flex;flex-direction:column;z-index:10}
+.sb-logo{padding:1.2rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.12)}
+.sb-logo strong{display:block;font-size:14px;font-weight:700;color:#fff}
+.sb-logo span{font-size:11px;color:rgba(255,255,255,.65)}
+.sb-menu{padding:.8rem 0;flex:1}
+.sb-menu a{display:flex;align-items:center;gap:10px;padding:.7rem 1.5rem;color:rgba(255,255,255,.82);font-size:14px;text-decoration:none;transition:background .18s}
+.sb-menu a:hover,.sb-menu a.active{background:rgba(255,255,255,.14);color:#fff}
+.sb-menu a .ic{font-size:18px;width:22px;text-align:center}
+.sb-bottom{padding:1rem 1.5rem;border-top:1px solid rgba(255,255,255,.12)}
+.sb-bottom a{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.7);font-size:13px;text-decoration:none}
+.main{margin-left:var(--sidebar);flex:1}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;align-items:center;gap:12px}
+.topbar a{font-size:13px;color:var(--text3);text-decoration:none}
+.topbar h1{font-size:17px;font-weight:700}
+.content{padding:1.5rem;max-width:800px}
+.form-group{margin-bottom:1.2rem}
+label{display:block;font-size:13px;font-weight:600;color:var(--text3);margin-bottom:5px}
+input,select,textarea{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;outline:none;transition:border-color .2s;background:#fff}
+input:focus,select:focus,textarea:focus{border-color:var(--green)}
+textarea{resize:vertical}
+.check-row{display:flex;align-items:center;gap:8px}
+.check-row input{width:auto}
+.check-row label{margin:0;font-size:14px;font-weight:600;color:var(--text)}
+.btn-row{display:flex;gap:10px;margin-top:1.5rem}
+.btn{padding:10px 22px;border-radius:20px;font-size:14px;font-weight:700;border:none;cursor:pointer;text-decoration:none;transition:opacity .18s;display:inline-block}
+.btn:hover{opacity:.85}
+.btn-green{background:var(--green);color:#fff}
+.btn-gray{background:#e0e0e0;color:#333}
+.img-preview{max-width:100%;max-height:160px;border-radius:10px;margin-top:8px;display:none}
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="sb-logo"><strong>jarkurganMMTB.uz</strong><span>Admin panel</span></div>
+  <div class="sb-menu">
+    <a href="/admin/dashboard"><span class="ic">📊</span> Dashboard</a>
+    <a href="/admin/news" class="active"><span class="ic">📰</span> Yangiliklar</a>
+    <a href="/admin/schools"><span class="ic">🏫</span> Maktablar</a>
+    <a href="/admin/documents"><span class="ic">📄</span> Hujjatlar</a>
+    <a href="/admin/contacts"><span class="ic">📩</span> Murojaatlar</a>
+    <a href="/admin/settings"><span class="ic">⚙️</span> Sozlamalar</a>
+  </div>
+  <div class="sb-bottom"><a href="/"><span>🌐</span> Saytni ko'rish</a></div>
+  <div class="sb-bottom"><a href="/logout"><span>🚪</span> Chiqish</a></div>
+</div>
+<div class="main">
+  <div class="topbar">
+    <a href="/admin/news">← Yangiliklarga qaytish</a>
+    <span>|</span>
+    <h1 th:text="${news.id == null ? 'Yangi yangilik' : 'Yangilikni tahrirlash'}">Yangilik</h1>
+  </div>
+  <div class="content">
+    <form th:action="@{/admin/news/save}" method="post" enctype="multipart/form-data">
+      <input type="hidden" th:if="${news.id}" name="id" th:value="${news.id}"/>
+      <div class="form-group">
+        <label>Sarlavha *</label>
+        <input type="text" name="title" th:value="${news.title}" required placeholder="Yangilik sarlavhasi"/>
+      </div>
+      <div class="form-group">
+        <label>Qisqacha mazmun</label>
+        <textarea name="shortDesc" rows="2" placeholder="Yangilik kartochkasida ko'rinadigan qisqacha tavsif..." th:text="${news.shortDesc}"></textarea>
+      </div>
+      <div class="form-group">
+        <label>To'liq mazmun *</label>
+        <textarea name="content" rows="10" required placeholder="Yangilik mazmuni..." th:text="${news.content}"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Kategoriya</label>
+        <select name="category">
+          <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}"
+                  th:selected="${news.category == cat}"></option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Rasm (ixtiyoriy)</label>
+        <input type="file" name="imageFile" accept="image/*" onchange="previewImg(this)"/>
+        <img id="imgPrev" class="img-preview" th:src="${news.imageUrl}" th:style="${news.imageUrl != null ? 'display:block' : ''}"/>
+      </div>
+      <div class="check-row">
+        <input type="checkbox" name="published" id="pub" th:checked="${news.published}"/>
+        <label for="pub">Darhol chop etish</label>
+      </div>
+      <div class="btn-row">
+        <button type="submit" class="btn btn-green">💾 Saqlash</button>
+        <a href="/admin/news" class="btn btn-gray">Bekor qilish</a>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+function previewImg(inp){
+  const prev=document.getElementById('imgPrev');
+  if(inp.files&&inp.files[0]){
+    const r=new FileReader();
+    r.onload=e=>{prev.src=e.target.result;prev.style.display='block'};
+    r.readAsDataURL(inp.files[0]);
+  }
+}
+</script>
+</body>
+</html>

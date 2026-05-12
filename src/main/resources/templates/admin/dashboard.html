@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="uz" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Dashboard — Admin</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--green:#1a6b3c;--green2:#23934f;--green3:#e6f5ec;--gold:#c8a227;--text:#1a2a1e;--text3:#6b8c73;--white:#fff;--bg:#f0f7f3;--border:#d4e8db;--sidebar:240px}
+body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+/* SIDEBAR */
+.sidebar{width:var(--sidebar);background:var(--green);position:fixed;top:0;left:0;height:100vh;display:flex;flex-direction:column;z-index:10}
+.sb-logo{padding:1.2rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.12)}
+.sb-logo strong{display:block;font-size:14px;font-weight:700;color:#fff}
+.sb-logo span{font-size:11px;color:rgba(255,255,255,.65)}
+.sb-menu{padding:.8rem 0;flex:1}
+.sb-menu a{display:flex;align-items:center;gap:10px;padding:.7rem 1.5rem;color:rgba(255,255,255,.82);font-size:14px;font-weight:500;transition:background .18s;text-decoration:none}
+.sb-menu a:hover,.sb-menu a.active{background:rgba(255,255,255,.14);color:#fff}
+.sb-menu a .ic{font-size:18px;width:22px;text-align:center}
+.sb-badge{background:#e53935;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:auto}
+.sb-bottom{padding:1rem 1.5rem;border-top:1px solid rgba(255,255,255,.12)}
+.sb-bottom a{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.7);font-size:13px;text-decoration:none}
+.sb-bottom a:hover{color:#fff}
+/* MAIN */
+.main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;align-items:center;justify-content:space-between}
+.topbar h1{font-size:17px;font-weight:700}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.topbar-right a{font-size:13px;color:var(--text3);text-decoration:none}
+.topbar-right a:hover{color:var(--green)}
+.content{padding:1.5rem;flex:1}
+/* FLASH */
+.flash-ok{background:#e6f5ec;color:#1a6b3c;border:1px solid #b2dfcc;border-radius:10px;padding:10px 14px;font-size:14px;margin-bottom:1rem}
+/* STAT CARDS */
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:1.5rem}
+.stat-c{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.2rem 1.4rem;display:flex;align-items:center;gap:1rem}
+.stat-c .ico{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.stat-c h3{font-size:1.6rem;font-weight:700;line-height:1}
+.stat-c p{font-size:13px;color:var(--text3);margin-top:3px}
+/* TABLES */
+.card{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1.5rem}
+.card-head{padding:1rem 1.2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-head h2{font-size:15px;font-weight:700}
+.card-head a{font-size:13px;color:var(--green);font-weight:600;text-decoration:none}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;padding:.7rem 1.2rem;border-bottom:1px solid var(--border);background:#fafcfa}
+td{padding:.7rem 1.2rem;font-size:14px;border-bottom:1px solid #f0f5f1}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f8fdf9}
+.status-yangi{background:#fff3e0;color:#e65100;font-size:12px;font-weight:700;padding:3px 10px;border-radius:10px}
+.status-korib{background:#e3f2fd;color:#1565c0;font-size:12px;font-weight:700;padding:3px 10px;border-radius:10px}
+.pub-yes{background:#e6f5ec;color:#1a6b3c;font-size:12px;font-weight:700;padding:3px 10px;border-radius:10px}
+.pub-no{background:#f5f5f5;color:#757575;font-size:12px;font-weight:700;padding:3px 10px;border-radius:10px}
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="sb-logo">
+    <strong>jarkurganMMTB.uz</strong>
+    <span>Admin panel</span>
+  </div>
+  <div class="sb-menu">
+    <a href="/admin/dashboard" class="active"><span class="ic">📊</span> Dashboard</a>
+    <a href="/admin/news"><span class="ic">📰</span> Yangiliklar</a>
+    <a href="/admin/schools"><span class="ic">🏫</span> Maktablar</a>
+    <a href="/admin/documents"><span class="ic">📄</span> Hujjatlar</a>
+    <a href="/admin/contacts">
+      <span class="ic">📩</span> Murojaatlar
+      <span class="sb-badge" th:if="${newContacts > 0}" th:text="${newContacts}">0</span>
+    </a>
+    <a href="/admin/settings"><span class="ic">⚙️</span> Sozlamalar</a>
+  </div>
+  <div class="sb-bottom">
+    <a href="/"><span>🌐</span> Saytni ko'rish</a>
+  </div>
+  <div class="sb-bottom">
+    <a href="/logout"><span>🚪</span> Chiqish</a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <h1>Dashboard</h1>
+    <div class="topbar-right">
+      <a href="/admin/news/new">+ Yangilik qo'shish</a>
+    </div>
+  </div>
+  <div class="content">
+    <div class="flash-ok" th:if="${success}" th:text="${success}"></div>
+
+    <!-- STAT CARDS -->
+    <div class="stat-row">
+      <div class="stat-c">
+        <div class="ico" style="background:#e6f5ec">📰</div>
+        <div><h3 th:text="${newsCount}">0</h3><p>Yangiliklar</p></div>
+      </div>
+      <div class="stat-c">
+        <div class="ico" style="background:#e3f2fd">🏫</div>
+        <div><h3 th:text="${schoolCount}">0</h3><p>Maktablar</p></div>
+      </div>
+      <div class="stat-c">
+        <div class="ico" style="background:#fff8e1">📩</div>
+        <div><h3 th:text="${contactCount}">0</h3><p>Murojaatlar</p></div>
+      </div>
+      <div class="stat-c">
+        <div class="ico" style="background:#fce4ec">🔔</div>
+        <div><h3 th:text="${newContacts}">0</h3><p>Yangi murojaatlar</p></div>
+      </div>
+    </div>
+
+    <!-- SO'NGI MUROJAATLAR -->
+    <div class="card">
+      <div class="card-head">
+        <h2>So'nggi murojaatlar</h2>
+        <a href="/admin/contacts">Barchasini ko'rish →</a>
+      </div>
+      <table>
+        <tr><th>Ism</th><th>Telefon</th><th>Xabar</th><th>Vaqt</th><th>Status</th></tr>
+        <tr th:if="${#lists.isEmpty(latestContacts)}">
+          <td colspan="5" style="text-align:center;color:#6b8c73;padding:2rem">Murojaatlar yo'q</td>
+        </tr>
+        <tr th:each="c : ${latestContacts}">
+          <td th:text="${c.fullName}">Ism</td>
+          <td th:text="${c.phone ?: '—'}">Tel</td>
+          <td th:text="${#strings.abbreviate(c.message, 50)}">Xabar</td>
+          <td th:text="${#temporals.format(c.createdAt,'dd.MM.yyyy HH:mm')}">Vaqt</td>
+          <td><span th:class="${c.status.name() == 'YANGI' ? 'status-yangi' : 'status-korib'}" th:text="${c.status}"></span></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- SO'NGI YANGILIKLAR -->
+    <div class="card">
+      <div class="card-head">
+        <h2>So'nggi yangiliklar</h2>
+        <a href="/admin/news">Barchasini ko'rish →</a>
+      </div>
+      <table>
+        <tr><th>Sarlavha</th><th>Kategoriya</th><th>Sana</th><th>Holati</th></tr>
+        <tr th:if="${#lists.isEmpty(latestNews)}">
+          <td colspan="4" style="text-align:center;color:#6b8c73;padding:2rem">Yangiliklar yo'q</td>
+        </tr>
+        <tr th:each="n : ${latestNews}">
+          <td th:text="${n.title}">Sarlavha</td>
+          <td th:text="${n.category}">Kat</td>
+          <td th:text="${#temporals.format(n.createdAt,'dd.MM.yyyy')}">Sana</td>
+          <td><span th:class="${n.published ? 'pub-yes' : 'pub-no'}" th:text="${n.published ? 'Chop etilgan' : 'Qoralama'}"></span></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+</body>
+</html>

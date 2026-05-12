@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="uz" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title th:text="${settings.siteName} + ' — ' + ${settings.siteTitle}">jarkurganMMTB.uz</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{--green:#1a6b3c;--green2:#23934f;--green3:#e6f5ec;--gold:#c8a227;--text:#1a2a1e;--text3:#6b8c73;--white:#fff;--bg:#f6fbf8;--border:#d4e8db}
+    body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text)}
+    a{text-decoration:none;color:inherit}
+    /* NAV */
+    nav{background:var(--green);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.18)}
+    .nav-logo{display:flex;align-items:center;gap:12px;padding:.8rem 0}
+    .nav-logo-icon{width:46px;height:46px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:var(--green);flex-shrink:0}
+    .nav-logo-text strong{display:block;font-size:15px;font-weight:700;color:#fff}
+    .nav-logo-text span{font-size:12px;color:rgba(255,255,255,.8)}
+    .nav-links{display:flex;gap:4px}
+    .nav-links a{color:#fff;font-size:14px;font-weight:600;padding:8px 14px;border-radius:6px;opacity:.9;transition:background .18s}
+    .nav-links a:hover{background:rgba(255,255,255,.15);opacity:1}
+    .nav-admin{background:var(--gold);color:var(--green)!important;font-weight:700;font-size:13px;padding:8px 18px;border-radius:20px;opacity:1!important}
+    /* HERO */
+    .hero{background:linear-gradient(135deg,#0f3d22 0%,#1a6b3c 55%,#23934f 100%);color:#fff;padding:5rem 2rem 4rem;text-align:center;position:relative;overflow:hidden}
+    .hero-badge{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:5px 18px;font-size:13px;margin-bottom:1.2rem;letter-spacing:.3px}
+    .hero h1{font-family:'Playfair Display',serif;font-size:clamp(1.9rem,4.5vw,3rem);font-weight:700;line-height:1.2;margin-bottom:1rem}
+    .hero p{font-size:17px;opacity:.88;max-width:560px;margin:0 auto 2.2rem;line-height:1.7}
+    .hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+    .btn-gold{background:var(--gold);color:var(--green);font-weight:700;font-size:15px;padding:13px 28px;border-radius:28px;border:none;cursor:pointer;transition:opacity .18s}
+    .btn-gold:hover{opacity:.88}
+    .btn-outline{background:transparent;color:#fff;font-weight:600;font-size:15px;padding:12px 26px;border-radius:28px;border:2px solid rgba(255,255,255,.5);cursor:pointer;transition:background .18s}
+    .btn-outline:hover{background:rgba(255,255,255,.1)}
+    /* STATS */
+    .stats{background:var(--white);border-bottom:1px solid var(--border);padding:1.5rem 2rem}
+    .stats-grid{max-width:900px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem}
+    .stat-card{text-align:center;padding:1rem}
+    .stat-num{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:700;color:var(--green)}
+    .stat-label{font-size:13px;color:var(--text3);margin-top:4px}
+    /* SECTIONS */
+    section{padding:3.5rem 2rem}
+    .inner{max-width:1060px;margin:0 auto}
+    .sec-head{text-align:center;margin-bottom:2.5rem}
+    .sec-tag{display:inline-block;background:var(--green3);color:var(--green);font-size:12px;font-weight:700;padding:4px 14px;border-radius:20px;margin-bottom:.7rem;text-transform:uppercase;letter-spacing:.5px}
+    .sec-head h2{font-family:'Playfair Display',serif;font-size:clamp(1.5rem,3vw,2.2rem);margin-bottom:.5rem}
+    .sec-head p{color:var(--text3);font-size:15px;max-width:520px;margin:0 auto}
+    /* SERVICES */
+    .services-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.2rem}
+    .svc-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.5rem 1.2rem;transition:box-shadow .2s,transform .2s}
+    .svc-card:hover{box-shadow:0 4px 24px rgba(26,107,60,.1);transform:translateY(-3px)}
+    .svc-icon{width:48px;height:48px;background:var(--green3);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:1rem}
+    .svc-card h3{font-size:15px;font-weight:700;margin-bottom:.4rem}
+    .svc-card p{font-size:13px;color:var(--text3);line-height:1.6}
+    /* NEWS */
+    .news-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
+    .news-card{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:box-shadow .2s;cursor:pointer;display:block}
+    .news-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.09);transform:translateY(-2px)}
+    .news-img{height:160px;overflow:hidden;background:var(--green3);display:flex;align-items:center;justify-content:center;font-size:3rem}
+    .news-img img{width:100%;height:100%;object-fit:cover}
+    .news-body{padding:1.2rem}
+    .news-cat{display:inline-block;background:var(--green3);color:var(--green);font-size:11px;font-weight:700;padding:3px 10px;border-radius:10px;margin-bottom:6px}
+    .news-date{font-size:12px;color:var(--text3);margin-bottom:6px}
+    .news-card h3{font-size:15px;font-weight:700;line-height:1.4;margin-bottom:6px}
+    .news-card p{font-size:13px;color:var(--text3);line-height:1.6}
+    /* SCHOOLS */
+    .school-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:1rem}
+    .school-item{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1rem 1.2rem;display:flex;gap:12px;align-items:flex-start;transition:background .18s}
+    .school-item:hover{background:var(--green3)}
+    .snum{min-width:38px;height:38px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px}
+    .sinfo h4{font-size:14px;font-weight:700}
+    .sinfo p{font-size:12px;color:var(--text3);margin-top:2px}
+    .stag{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:8px;margin-top:4px}
+    .t-MAKTAB{background:#e3f2fd;color:#1565c0}
+    .t-MTM{background:#fce4ec;color:#c62828}
+    .t-IXTISOSLASHGAN{background:#f3e5f5;color:#6a1b9a}
+    /* DOCS */
+    .doc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem}
+    .doc-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1.2rem;display:flex;gap:12px;align-items:center;transition:box-shadow .18s}
+    .doc-card:hover{box-shadow:0 2px 12px rgba(26,107,60,.1)}
+    .doc-icon{width:42px;height:42px;background:#fdecea;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+    .doc-card h4{font-size:14px;font-weight:700;margin-bottom:2px}
+    .doc-card p{font-size:12px;color:var(--text3)}
+    /* ABOUT */
+    .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:start}
+    .about-text p{font-size:15px;line-height:1.8;color:#3d5c47;margin-bottom:1rem}
+    .leaders-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    .leader-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1.2rem;text-align:center}
+    .l-avatar{width:60px;height:60px;border-radius:50%;background:var(--green3);border:3px solid var(--green2);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:var(--green);margin:0 auto .8rem}
+    .leader-card h3{font-size:14px;font-weight:700;margin-bottom:3px}
+    .leader-card p{font-size:12px;color:var(--text3)}
+    .leader-card .ph{margin-top:6px;font-size:13px;color:var(--green);font-weight:600}
+    /* CONTACT */
+    .contact-sec{background:linear-gradient(135deg,#0f3d22,#1a6b3c)}
+    .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:2rem}
+    .cinfo{display:flex;flex-direction:column;gap:1rem}
+    .crow{display:flex;gap:12px;align-items:flex-start}
+    .crow-icon{width:40px;height:40px;background:rgba(255,255,255,.12);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+    .crow-text strong{display:block;font-size:14px;font-weight:700;color:#fff;margin-bottom:2px}
+    .crow-text span{font-size:13px;color:rgba(255,255,255,.78)}
+    .cform{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:1.5rem;display:flex;flex-direction:column;gap:10px}
+    .cform input,.cform textarea{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:10px 14px;color:#fff;font-size:14px;font-family:'Nunito',sans-serif;width:100%;resize:none;outline:none}
+    .cform input::placeholder,.cform textarea::placeholder{color:rgba(255,255,255,.5)}
+    .cform input:focus,.cform textarea:focus{border-color:var(--gold)}
+    .c-alert{padding:10px 14px;border-radius:8px;font-size:13px;display:none}
+    .c-ok{background:rgba(76,175,80,.2);color:#a5d6a7;border:1px solid rgba(76,175,80,.3)}
+    .c-err{background:rgba(244,67,54,.2);color:#ef9a9a;border:1px solid rgba(244,67,54,.3)}
+    /* FOOTER */
+    footer{background:#0a2e18;color:#fff;padding:2.5rem 2rem 1.5rem}
+    .f-grid{max-width:1060px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr;gap:2rem;margin-bottom:2rem}
+    .f-about strong{display:block;font-size:16px;font-weight:700;margin-bottom:8px;color:var(--gold)}
+    .f-about p{font-size:13px;opacity:.7;line-height:1.7}
+    .f-col h4{font-size:14px;font-weight:700;margin-bottom:12px;color:var(--gold)}
+    .f-col ul{list-style:none;display:flex;flex-direction:column;gap:7px}
+    .f-col ul li a{font-size:13px;opacity:.72;transition:opacity .15s}
+    .f-col ul li a:hover{opacity:1}
+    .f-bottom{max-width:1060px;margin:0 auto;border-top:1px solid rgba(255,255,255,.1);padding-top:1.2rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+    .f-bottom p{font-size:12px;opacity:.5}
+    @media(max-width:768px){.about-grid,.contact-grid{grid-template-columns:1fr}.f-grid{grid-template-columns:1fr}.nav-links{display:none}}
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-icon">J</div>
+    <div class="nav-logo-text">
+      <strong th:text="${settings.siteName}">jarkurganMMTB.uz</strong>
+      <span>Maktabgacha va maktab ta'limi bo'limi</span>
+    </div>
+  </div>
+  <div class="nav-links">
+    <a href="/">Bosh sahifa</a>
+    <a href="#about">Bo'lim haqida</a>
+    <a href="/news">Yangiliklar</a>
+    <a href="#schools">Maktablar</a>
+    <a href="#mtm">MTM</a>
+    <a href="#docs">Hujjatlar</a>
+    <a href="#contact">Murojaat</a>
+    <a href="/admin/dashboard" class="nav-admin">⚙ Admin</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">Surxondaryo viloyati · Jarqo'rg'on tumani</div>
+  <h1 th:text="${settings.siteTitle}">Jarqo'rg'on Tumani Maktabgacha va Maktab Ta'limi Bo'limi</h1>
+  <p th:text="${settings.siteDescription}">Sifatli ta'lim, zamonaviy yondashuv, yorqin kelajak.</p>
+  <div class="hero-btns">
+    <a href="/news" class="btn-gold">Yangiliklar</a>
+    <a href="#contact" class="btn-outline">Murojaat qilish</a>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-num" th:text="${settings.schoolCount}">42</div>
+      <div class="stat-label">Umumiy ta'lim maktabi</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" th:text="${settings.mtmCount}">18</div>
+      <div class="stat-label">Maktabgacha ta'lim muassasasi</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" th:text="${settings.studentCount} + '+'">14300+</div>
+      <div class="stat-label">O'quvchilar soni</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" th:text="${settings.teacherCount} + '+'">1200+</div>
+      <div class="stat-label">Pedagog xodimlar</div>
+    </div>
+  </div>
+</div>
+
+<!-- XIZMATLAR -->
+<section style="background:var(--bg)">
+  <div class="inner">
+    <div class="sec-head">
+      <div class="sec-tag">Xizmatlar</div>
+      <h2>Bo'limimiz xizmatlari</h2>
+      <p>Maktabgacha va umumiy o'rta ta'lim sohasida keng qamrovli xizmatlar</p>
+    </div>
+    <div class="services-grid">
+      <div class="svc-card"><div class="svc-icon">🏫</div><h3>Maktablar boshqaruvi</h3><p>Tuman miqyosida barcha ta'lim muassasalarini nazorat qilish va metodologik yordam ko'rsatish</p></div>
+      <div class="svc-card"><div class="svc-icon">👶</div><h3>Maktabgacha ta'lim</h3><p>MTM'larni boshqarish, bolalarni bog'cha va maktabgacha guruhlar bilan ta'minlash</p></div>
+      <div class="svc-card"><div class="svc-icon">📋</div><h3>Attestatsiya</h3><p>O'qituvchilar malakasini oshirish va attestatsiyadan o'tkazish bo'yicha ko'maklashish</p></div>
+      <div class="svc-card"><div class="svc-icon">📊</div><h3>Monitoring</h3><p>Ta'lim sifatini baholash, natijalarni tahlil qilish va statistik ma'lumotlar yig'ish</p></div>
+      <div class="svc-card"><div class="svc-icon">📝</div><h3>Hujjatlashtirish</h3><p>Arizalar qabul qilish, ma'lumotnomalar berish va rasmiy hujjatlarni rasmiylashtirishda yordam</p></div>
+      <div class="svc-card"><div class="svc-icon">🏆</div><h3>Olimpiadalar</h3><p>Tuman olimpiadalarini tashkil etish va o'quvchilarni viloyat musobaqalariga tayyorlash</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- SO'NGI YANGILIKLAR -->
+<section style="background:var(--white)">
+  <div class="inner">
+    <div class="sec-head">
+      <div class="sec-tag">Yangiliklar</div>
+      <h2>So'nggi yangiliklar</h2>
+    </div>
+    <div th:if="${#lists.isEmpty(latestNews)}" style="text-align:center;color:var(--text3);padding:2rem">
+      Hozircha yangiliklar yo'q
+    </div>
+    <div class="news-grid" th:unless="${#lists.isEmpty(latestNews)}">
+      <a class="news-card" th:each="n : ${latestNews}" th:href="@{/news/{id}(id=${n.id})}">
+        <div class="news-img">
+          <img th:if="${n.imageUrl}" th:src="${n.imageUrl}" th:alt="${n.title}"/>
+          <span th:unless="${n.imageUrl}">📰</span>
+        </div>
+        <div class="news-body">
+          <span class="news-cat" th:text="${n.category}">YANGILIK</span>
+          <div class="news-date" th:text="${#temporals.format(n.createdAt,'dd.MM.yyyy')}"></div>
+          <h3 th:text="${n.title}">Sarlavha</h3>
+          <p th:text="${n.shortDesc}">Qisqacha mazmun...</p>
+        </div>
+      </a>
+    </div>
+    <div style="text-align:center;margin-top:2rem">
+      <a href="/news" style="display:inline-block;border:2px solid var(--green);color:var(--green);font-weight:700;font-size:14px;padding:10px 28px;border-radius:24px">Barcha yangiliklar →</a>
+    </div>
+  </div>
+</section>
+
+<!-- BO'LIM HAQIDA -->
+<section id="about" style="background:var(--bg)">
+  <div class="inner">
+    <div class="sec-head">
+      <div class="sec-tag">Bo'lim haqida</div>
+      <h2>Biz haqimizda</h2>
+    </div>
+    <div class="about-grid">
+      <div class="about-text">
+        <p th:text="${settings.aboutText}">Bo'lim haqida ma'lumot...</p>
+        <div style="margin-top:1.5rem;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;gap:10px;align-items:center">
+            <span style="font-size:18px">📍</span>
+            <span th:text="${settings.address}" style="font-size:14px;color:#3d5c47"></span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <span style="font-size:18px">📞</span>
+            <span th:text="${settings.phone}" style="font-size:14px;color:#3d5c47"></span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <span style="font-size:18px">✉️</span>
+            <span th:text="${settings.email}" style="font-size:14px;color:#3d5c47"></span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <span style="font-size:18px">🕐</span>
+            <span th:text="${settings.workHours}" style="font-size:14px;color:#3d5c47"></span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p style="font-weight:700;font-size:14px;color:var(--green);margin-bottom:1rem">RAHBARIYAT</p>
+        <div class="leaders-grid">
+          <div class="leader-card">
+            <div class="l-avatar" th:text="${#strings.substring(settings.leaderName,0,2).toUpperCase()}">BI</div>
+            <h3 th:text="${settings.leaderName}">F.I.O</h3>
+            <p th:text="${settings.leaderPosition}">Bo'lim boshlig'i</p>
+            <div class="ph" th:text="${settings.leaderPhone}">+998 77 000-00-00</div>
+          </div>
+          <div class="leader-card">
+            <div class="l-avatar" th:text="${#strings.substring(settings.deputyName,0,2).toUpperCase()}">BI</div>
+            <h3 th:text="${settings.deputyName}">F.I.O</h3>
+            <p th:text="${settings.deputyPosition}">O'rinbosar</p>
+            <div class="ph" th:text="${settings.deputyPhone}">+998 77 000-00-00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MAKTABLAR -->
+<section id="schools" style="background:var(--white)">
+  <div class="inner">
+    <div class="sec-head">
+      <div class="sec-tag">Ta'lim muassasalari</div>
+      <h2>Tumanidagi maktablar</h2>
+      <p>Umumiy o'rta ta'lim va ixtisoslashtirilgan maktablar</p>
+    </div>
+
+    <div th:if="${#lists.isEmpty(maktablar) and #lists.isEmpty(ixtisoslashganlar)}"
+         style="text-align:center;color:var(--text3);padding:2rem">
+      Maktablar hali qo'shilmagan
+    </div>
+
+    <div class="school-grid" th:unless="${#lists.isEmpty(maktablar) and #lists.isEmpty(ixtisoslashganlar)}">
+      <div class="school-item" th:each="s : ${maktablar}">
+        <div class="snum" th:text="${s.number}">1</div>
+        <div class="sinfo">
+          <h4 th:text="${s.name}">Maktab nomi</h4>
+          <p th:text="${s.address}">Manzil</p>
+          <span class="stag t-MAKTAB">Umumiy ta'lim</span>
+          <p th:if="${s.directorName}" th:text="'Direktor: ' + ${s.directorName}" style="margin-top:3px;font-size:12px;color:var(--text3)"></p>
+          <button th:if="${s.latitude != null}" class="map-btn"
+                  th:data-lat="${s.latitude}" th:data-lng="${s.longitude}"
+                  th:data-name="${s.name}" th:data-address="${s.address != null ? s.address : ''}"
+                  onclick="showSchoolMapFromBtn(this)"
+                  style="margin-top:6px;background:var(--green3);color:var(--green);border:none;padding:4px 10px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer">
+            🗺 Xaritada ko'rish
+          </button>
+        </div>
+      </div>
+      <div class="school-item" th:each="s : ${ixtisoslashganlar}">
+        <div class="snum" th:text="${s.number}">1</div>
+        <div class="sinfo">
+          <h4 th:text="${s.name}">Maktab nomi</h4>
+          <p th:text="${s.address}">Manzil</p>
+          <span class="stag t-IXTISOSLASHGAN">Ixtisoslashgan</span>
+          <p th:if="${s.directorName}" th:text="'Direktor: ' + ${s.directorName}" style="margin-top:3px;font-size:12px;color:var(--text3)"></p>
+          <button th:if="${s.latitude != null}" class="map-btn"
+                  th:data-lat="${s.latitude}" th:data-lng="${s.longitude}"
+                  th:data-name="${s.name}" th:data-address="${s.address != null ? s.address : ''}"
+                  onclick="showSchoolMapFromBtn(this)"
+                  style="margin-top:6px;background:var(--green3);color:var(--green);border:none;padding:4px 10px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer">
+            🗺 Xaritada ko'rish
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MTM -->
+<section id="mtm" style="background:var(--bg)">
+  <div class="inner">
+    <div class="sec-head">
+      <div class="sec-tag" style="background:#fce4ec;color:#c62828">Maktabgacha ta'lim</div>
+      <h2>Maktabgacha ta'lim muassasalari</h2>
+      <p>Bolalar bog'chalari va maktabgacha ta'lim muassasalari</p>
+    </div>
+
+    <div th:if="${#lists.isEmpty(mtmlar)}"
+         style="text-align:center;color:var(--text3);padding:2rem">
+      MTM lar hali qo'shilmagan
+    </div>
+
+    <div class="school-grid" th:unless="${#lists.isEmpty(mtmlar)}">
+      <div class="school-item" th:each="s : ${mtmlar}">
+        <div class="snum" style="background:#c62828" th:text="${s.number}">1</div>
+        <div class="sinfo">
+          <h4 th:text="${s.name}">MTM nomi</h4>
+          <p th:text="${s.address}">Manzil</p>
+          <span class="stag t-MTM">Maktabgacha ta'lim</span>
+          <p th:if="${s.directorName}" th:text="'Mudira: ' + ${s.directorName}" style="margin-top:3px;font-size:12px;color:var(--text3)"></p>
+          <p th:if="${s.studentCount}" th:text="${s.studentCount} + ' nafar bola'" style="margin-top:3px;font-size:12px;color:var(--text3)"></p>
+          <button th:if="${s.latitude != null}" class="map-btn"
+                  th:data-lat="${s.latitude}" th:data-lng="${s.longitude}"
+                  th:data-name="${s.name}" th:data-address="${s.address != null ? s.address : ''}"
+                  onclick="showSchoolMapFromBtn(this)"
+                  style="margin-top:6px;background:#fce4ec;color:#c62828;border:none;padding:4px 10px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer">
+            🗺 Xaritada ko'rish
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- XARITA MODAL (public) -->
+<div id="schoolMapModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center;padding:1rem">
+  <div style="background:#fff;border-radius:18px;width:100%;max-width:660px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.3)">
+    <div style="padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)">
+      <h3 id="pub-modal-name" style="font-size:16px;font-weight:700"></h3>
+      <button onclick="closeSchoolMap()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--text3)">✕</button>
+    </div>
+    <div id="pub-view-map" style="height:380px;width:100%"></div>
+    <div style="padding:1rem 1.5rem;background:#f8fdf9;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <p id="pub-modal-addr" style="font-size:13px;color:var(--text3)"></p>
+      <a id="pub-gmaps-link" href="#" target="_blank"
+         style="background:var(--green);color:#fff;font-size:13px;font-weight:700;padding:8px 16px;border-radius:14px;text-decoration:none">
+        🗺 Google Maps da ochish
+      </a>
+    </div>
+  </div>
+</div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+  let pubMap = null;
+  function showSchoolMapFromBtn(btn) {
+    const lat = parseFloat(btn.dataset.lat);
+    const lng = parseFloat(btn.dataset.lng);
+    const name = btn.dataset.name;
+    const address = btn.dataset.address;
+    showSchoolMap(lat, lng, name, address);
+  }
+  function showSchoolMap(lat, lng, name, address) {
+    const modal = document.getElementById('schoolMapModal');
+    modal.style.display = 'flex';
+    document.getElementById('pub-modal-name').textContent = '🏫 ' + name;
+    document.getElementById('pub-modal-addr').textContent = address ? '📍 ' + address : '';
+    document.getElementById('pub-gmaps-link').href = 'https://www.google.com/maps?q=' + lat + ',' + lng + '&z=17';
+    setTimeout(() => {
+      if (pubMap) { pubMap.remove(); pubMap = null; }
+      pubMap = L.map('pub-view-map').setView([lat, lng], 17);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution:'© OpenStreetMap', maxZoom:19}).addTo(pubMap);
+      const redIcon = L.icon({
+        iconUrl:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+        shadowUrl:'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+        iconSize:[25,41],iconAnchor:[12,41],popupAnchor:[1,-34],shadowSize:[41,41]
+      });
+      L.marker([lat,lng],{icon:redIcon}).addTo(pubMap)
+              .bindPopup('<b>🏫 '+name+'</b>'+(address?'<br>📍 '+address:'')).openPopup();
+      L.circle([lat,lng],{radius:80,color:'#1a6b3c',fillColor:'#e6f5ec',fillOpacity:0.3,weight:2}).addTo(pubMap);
+    }, 150);
+  }
+  function closeSchoolMap() {
+    document.getElementById('schoolMapModal').style.display = 'none';
+  }
+  document.getElementById('schoolMapModal').addEventListener('click', function(e) {
+    if (e.target === this) closeSchoolMap();
+  });
+</script>
+
+<!-- HUJJATLAR -->
+<section id="docs" style="background:var(--bg)">
+  <div class="inner">
+    <div class="sec-head">
+      <div class="sec-tag">Hujjatlar</div>
+      <h2>Foydali hujjatlar</h2>
+      <p>Yuklab olish uchun mavjud rasmiy hujjatlar</p>
+    </div>
+    <div th:if="${#lists.isEmpty(docs)}" style="text-align:center;color:var(--text3);padding:2rem">
+      Hujjatlar hali yuklanmagan
+    </div>
+    <div class="doc-grid" th:unless="${#lists.isEmpty(docs)}">
+      <a class="doc-card" th:each="d : ${docs}" th:href="@{/uploads/{f}(f=${d.filePath})}" target="_blank">
+        <div class="doc-icon">📄</div>
+        <div>
+          <h4 th:text="${d.title}">Hujjat nomi</h4>
+          <p th:text="${d.category} + ' · ' + ${d.fileName}">Kategoriya</p>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- MUROJAAT -->
+<section id="contact" class="contact-sec">
+  <div class="inner">
+    <div class="sec-head">
+      <div class="sec-tag" style="background:rgba(255,255,255,.15);color:#fff">Murojaat</div>
+      <h2 style="color:#fff">Biz bilan bog'laning</h2>
+      <p style="color:rgba(255,255,255,.78)">Savollaringiz bormi? Xabar qoldiring</p>
+    </div>
+    <div class="contact-grid">
+      <div class="cinfo">
+        <div class="crow"><div class="crow-icon">📍</div><div class="crow-text"><strong>Manzil</strong><span th:text="${settings.address}">Manzil</span></div></div>
+        <div class="crow"><div class="crow-icon">📞</div><div class="crow-text"><strong>Telefon</strong><span th:text="${settings.phone}">Telefon</span></div></div>
+        <div class="crow"><div class="crow-icon">✉️</div><div class="crow-text"><strong>E-pochta</strong><span th:text="${settings.email}">Email</span></div></div>
+        <div class="crow"><div class="crow-icon">🕐</div><div class="crow-text"><strong>Ish vaqti</strong><span th:text="${settings.workHours}">Ish vaqti</span></div></div>
+        <div class="crow" th:if="${settings.telegram}">
+          <div class="crow-icon">💬</div>
+          <div class="crow-text"><strong>Telegram</strong><span th:text="${settings.telegram}">@kanal</span></div>
+        </div>
+      </div>
+      <div class="cform">
+        <div class="c-alert" id="calert"></div>
+        <input type="text" id="cname" placeholder="Ismingiz *"/>
+        <input type="tel" id="cphone" placeholder="Telefon raqam"/>
+        <input type="email" id="cemail" placeholder="E-pochta"/>
+        <textarea rows="4" id="cmsg" placeholder="Xabaringiz *"></textarea>
+        <button class="btn-gold" onclick="sendContact()" id="csend" style="width:100%">Yuborish</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="f-grid">
+    <div class="f-about">
+      <strong th:text="${settings.siteName}">jarkurganMMTB.uz</strong>
+      <p th:text="${settings.siteTitle}">Jarqo'rg'on tumani maktabgacha va maktab ta'limi bo'limi rasmiy veb-sayti.</p>
+    </div>
+    <div class="f-col">
+      <h4>Havolalar</h4>
+      <ul>
+        <li><a href="/">Bosh sahifa</a></li>
+        <li><a href="/news">Yangiliklar</a></li>
+        <li><a href="#schools">Maktablar</a></li>
+        <li><a href="#docs">Hujjatlar</a></li>
+        <li><a href="#contact">Murojaat</a></li>
+      </ul>
+    </div>
+    <div class="f-col">
+      <h4>Foydali saytlar</h4>
+      <ul>
+        <li><a href="https://uzedu.uz" target="_blank">uzedu.uz</a></li>
+        <li><a href="https://edu.uz" target="_blank">edu.uz</a></li>
+        <li><a href="https://hemis.uz" target="_blank">HEMIS</a></li>
+        <li><a href="https://my.gov.uz" target="_blank">my.gov.uz</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="f-bottom">
+    <p th:text="'© 2026 ' + ${settings.siteName} + '. Barcha huquqlar himoyalangan.'">© 2025</p>
+    <p>Surxondaryo viloyati, O'zbekiston</p>
+  </div>
+</footer>
+
+<script>
+  async function sendContact() {
+    const name = document.getElementById('cname').value.trim();
+    const msg  = document.getElementById('cmsg').value.trim();
+    const alert = document.getElementById('calert');
+    const btn   = document.getElementById('csend');
+    if (!name || !msg) {
+      alert.className='c-alert c-err'; alert.style.display='block';
+      alert.textContent='Ism va xabar majburiy!'; return;
+    }
+    btn.disabled=true; btn.textContent='Yuborilmoqda...';
+    try {
+      const r = await fetch('/contact',{method:'POST',headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({fullName:name, phone:document.getElementById('cphone').value,
+          email:document.getElementById('cemail').value, message:msg})});
+      if(r.ok){
+        alert.className='c-alert c-ok'; alert.style.display='block';
+        alert.textContent='✅ Murojaatingiz qabul qilindi! Tez orada javob beramiz.';
+        document.getElementById('cname').value='';
+        document.getElementById('cphone').value='';
+        document.getElementById('cemail').value='';
+        document.getElementById('cmsg').value='';
+      } else { throw new Error(); }
+    } catch(e){
+      alert.className='c-alert c-err'; alert.style.display='block';
+      alert.textContent='Xatolik yuz berdi. Iltimos, qayta urinib ko\'ring.';
+    }
+    btn.disabled=false; btn.textContent='Yuborish';
+  }
+</script>
+</body>
+</html>

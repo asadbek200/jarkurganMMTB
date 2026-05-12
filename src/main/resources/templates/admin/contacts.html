@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="uz" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Murojaatlar — Admin</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--green:#1a6b3c;--green3:#e6f5ec;--gold:#c8a227;--text:#1a2a1e;--text3:#6b8c73;--white:#fff;--bg:#f0f7f3;--border:#d4e8db;--sidebar:240px}
+body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar);background:var(--green);position:fixed;top:0;left:0;height:100vh;display:flex;flex-direction:column;z-index:10}
+.sb-logo{padding:1.2rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.12)}
+.sb-logo strong{display:block;font-size:14px;font-weight:700;color:#fff}
+.sb-logo span{font-size:11px;color:rgba(255,255,255,.65)}
+.sb-menu{padding:.8rem 0;flex:1}
+.sb-menu a{display:flex;align-items:center;gap:10px;padding:.7rem 1.5rem;color:rgba(255,255,255,.82);font-size:14px;text-decoration:none;transition:background .18s}
+.sb-menu a:hover,.sb-menu a.active{background:rgba(255,255,255,.14);color:#fff}
+.sb-menu a .ic{font-size:18px;width:22px;text-align:center}
+.sb-badge{background:#e53935;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:auto}
+.sb-bottom{padding:1rem 1.5rem;border-top:1px solid rgba(255,255,255,.12)}
+.sb-bottom a{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.7);font-size:13px;text-decoration:none}
+.main{margin-left:var(--sidebar);flex:1}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:.8rem 1.5rem;display:flex;align-items:center;justify-content:space-between}
+.topbar h1{font-size:17px;font-weight:700}
+.topbar span{font-size:13px;color:var(--text3)}
+.content{padding:1.5rem}
+.btn{display:inline-block;padding:6px 14px;border-radius:16px;font-size:12px;font-weight:700;border:none;cursor:pointer;text-decoration:none}
+.btn-red{background:#e53935;color:#fff}
+.btn-blue{background:#1565c0;color:#fff}
+.table-card{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;padding:.7rem 1.2rem;border-bottom:1px solid var(--border);background:#fafcfa}
+td{padding:.75rem 1.2rem;font-size:14px;border-bottom:1px solid #f0f5f1;vertical-align:top}
+tr:last-child td{border-bottom:none}
+.s-yangi{background:#fff3e0;color:#e65100;font-size:11px;font-weight:700;padding:3px 8px;border-radius:8px}
+.s-korib{background:#e3f2fd;color:#1565c0;font-size:11px;font-weight:700;padding:3px 8px;border-radius:8px}
+.s-yopildi{background:#f5f5f5;color:#757575;font-size:11px;font-weight:700;padding:3px 8px;border-radius:8px}
+.msg-cell{max-width:300px;font-size:13px;color:var(--text3);line-height:1.5}
+.actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="sb-logo"><strong>jarkurganMMTB.uz</strong><span>Admin panel</span></div>
+  <div class="sb-menu">
+    <a href="/admin/dashboard"><span class="ic">📊</span> Dashboard</a>
+    <a href="/admin/news"><span class="ic">📰</span> Yangiliklar</a>
+    <a href="/admin/schools"><span class="ic">🏫</span> Maktablar</a>
+    <a href="/admin/documents"><span class="ic">📄</span> Hujjatlar</a>
+    <a href="/admin/contacts" class="active">
+      <span class="ic">📩</span> Murojaatlar
+      <span class="sb-badge" th:if="${newCount > 0}" th:text="${newCount}">0</span>
+    </a>
+    <a href="/admin/settings"><span class="ic">⚙️</span> Sozlamalar</a>
+  </div>
+  <div class="sb-bottom"><a href="/"><span>🌐</span> Saytni ko'rish</a></div>
+  <div class="sb-bottom"><a href="/logout"><span>🚪</span> Chiqish</a></div>
+</div>
+<div class="main">
+  <div class="topbar">
+    <h1>Murojaatlar</h1>
+    <span th:if="${newCount > 0}" th:text="${newCount} + ' ta yangi murojaat'"></span>
+  </div>
+  <div class="content">
+    <div class="table-card">
+      <table>
+        <tr><th>Ism</th><th>Telefon</th><th>Email</th><th>Xabar</th><th>Vaqt</th><th>Status</th><th>Amal</th></tr>
+        <tr th:if="${#lists.isEmpty(contacts)}">
+          <td colspan="7" style="text-align:center;color:#6b8c73;padding:2rem">Murojaatlar yo'q</td>
+        </tr>
+        <tr th:each="c : ${contacts}">
+          <td style="font-weight:600" th:text="${c.fullName}">Ism</td>
+          <td th:text="${c.phone ?: '—'}">Tel</td>
+          <td th:text="${c.email ?: '—'}">Email</td>
+          <td class="msg-cell" th:text="${c.message}">Xabar</td>
+          <td style="white-space:nowrap" th:text="${#temporals.format(c.createdAt,'dd.MM.yyyy HH:mm')}">Vaqt</td>
+          <td>
+            <span th:class="${c.status.name()=='YANGI'?'s-yangi':c.status.name()=='KORIB_CHIQILDI'?'s-korib':'s-yopildi'}"
+                  th:text="${c.status}"></span>
+          </td>
+          <td>
+            <div class="actions">
+              <form th:action="@{/admin/contacts/status/{id}(id=${c.id})}" method="post">
+                <input type="hidden" name="status" value="KORIB_CHIQILDI"/>
+                <button type="submit" class="btn btn-blue" th:if="${c.status.name()=='YANGI'}">✅ Ko'rildi</button>
+              </form>
+              <form th:action="@{/admin/contacts/status/{id}(id=${c.id})}" method="post">
+                <input type="hidden" name="status" value="YOPILDI"/>
+                <button type="submit" class="btn" style="background:#78909c;color:#fff" th:unless="${c.status.name()=='YOPILDI'}">🔒 Yop</button>
+              </form>
+              <form th:action="@{/admin/contacts/delete/{id}(id=${c.id})}" method="post" onsubmit="return confirm('O\'chirasizmi?')">
+                <button type="submit" class="btn btn-red">🗑</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+</body>
+</html>

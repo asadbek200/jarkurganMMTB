@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="uz" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Maktablar — Admin</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{--green:#1a6b3c;--green3:#e6f5ec;--gold:#c8a227;--text:#1a2a1e;--text3:#6b8c73;--white:#fff;--bg:#f0f7f3;--border:#d4e8db;--sidebar:240px}
+    body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+    .sidebar{width:var(--sidebar);background:var(--green);position:fixed;top:0;left:0;height:100vh;display:flex;flex-direction:column;z-index:10}
+    .sb-logo{padding:1.2rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.12)}
+    .sb-logo strong{display:block;font-size:14px;font-weight:700;color:#fff}
+    .sb-logo span{font-size:11px;color:rgba(255,255,255,.65)}
+    .sb-menu{padding:.8rem 0;flex:1}
+    .sb-menu a{display:flex;align-items:center;gap:10px;padding:.7rem 1.5rem;color:rgba(255,255,255,.82);font-size:14px;text-decoration:none;transition:background .18s}
+    .sb-menu a:hover,.sb-menu a.active{background:rgba(255,255,255,.14);color:#fff}
+    .sb-menu a .ic{font-size:18px;width:22px;text-align:center}
+    .sb-bottom{padding:1rem 1.5rem;border-top:1px solid rgba(255,255,255,.12)}
+    .sb-bottom a{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.7);font-size:13px;text-decoration:none}
+    .main{margin-left:var(--sidebar);flex:1}
+    .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:.8rem 1.5rem}
+    .topbar h1{font-size:17px;font-weight:700}
+    .content{padding:1.5rem}
+    .flash{background:#e6f5ec;color:#1a6b3c;border:1px solid #b2dfcc;border-radius:10px;padding:10px 14px;font-size:14px;margin-bottom:1rem}
+    .btn{display:inline-block;padding:9px 18px;border-radius:20px;font-size:13px;font-weight:700;border:none;cursor:pointer;text-decoration:none;transition:opacity .18s}
+    .btn:hover{opacity:.85}
+    .btn-green{background:var(--green);color:#fff}
+    .btn-gold{background:var(--gold);color:var(--text)}
+    .btn-red{background:#e53935;color:#fff}
+    .btn-sm{padding:5px 12px;font-size:12px;border-radius:12px}
+    /* FORM */
+    .form-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.5rem;margin-bottom:1.5rem}
+    .form-card h2{font-size:15px;font-weight:700;margin-bottom:1.2rem;color:var(--green)}
+    .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1rem;align-items:end}
+    .fg{display:flex;flex-direction:column;gap:4px}
+    label{font-size:13px;font-weight:600;color:var(--text3)}
+    input,select{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;outline:none;background:#fff;transition:border-color .2s}
+    input:focus,select:focus{border-color:var(--green)}
+    input[readonly]{background:#f8fdf9}
+    /* MAP PICKER */
+    .map-section{margin-top:1.2rem;border:1.5px solid var(--border);border-radius:12px;overflow:hidden}
+    .map-header{background:#f8fdf9;padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+    .map-header span{font-size:13px;font-weight:700}
+    .map-hint{font-size:12px;background:var(--green3);color:var(--green);padding:3px 10px;border-radius:10px;font-weight:600}
+    .coord-row{display:grid;grid-template-columns:1fr 1fr auto;gap:1rem;padding:.8rem 1rem;background:#fafcfa;border-top:1px solid var(--border);align-items:end}
+    .coord-row .fg{margin:0}
+    .clear-btn{padding:9px 14px;border-radius:8px;background:#fee2e2;color:#b91c1c;border:none;cursor:pointer;font-size:13px;font-weight:600}
+    /* TABLE */
+    .table-card{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+    table{width:100%;border-collapse:collapse}
+    th{text-align:left;font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;padding:.7rem 1.2rem;border-bottom:1px solid var(--border);background:#fafcfa}
+    td{padding:.75rem 1.2rem;font-size:14px;border-bottom:1px solid #f0f5f1;vertical-align:middle}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:#f8fdf9}
+    .stag{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:8px}
+    .t-MAKTAB{background:#e3f2fd;color:#1565c0}
+    .t-MTM{background:#fce4ec;color:#c62828}
+    .t-IXTISOSLASHGAN{background:#f3e5f5;color:#6a1b9a}
+    .td-btns{display:flex;gap:6px;flex-wrap:wrap}
+    .has-loc{background:var(--green3);color:var(--green);border:none;padding:4px 10px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer}
+    .no-loc{color:var(--text3);font-size:12px}
+    /* MODALS */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem}
+    .modal-overlay.open{display:flex}
+    .modal{background:#fff;border-radius:16px;width:100%;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:pop .2s ease}
+    @keyframes pop{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+    .modal-head{padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+    .modal-head h3{font-size:16px;font-weight:700}
+    .modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--text3)}
+    /* EDIT MODAL */
+    .edit-modal{max-width:700px}
+    .edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:1.5rem}
+    .edit-fg{display:flex;flex-direction:column;gap:4px}
+    .edit-full{grid-column:1/-1}
+    .edit-map{height:220px;width:100%}
+    .edit-coords{display:grid;grid-template-columns:1fr 1fr auto;gap:.8rem;padding:.8rem 1.5rem;background:#fafcfa;border-top:1px solid var(--border);align-items:end}
+    .edit-coords .fg{margin:0}
+    .modal-footer-btns{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+    /* MAP VIEW MODAL */
+    .view-modal{max-width:680px}
+    #view-map{height:380px;width:100%}
+    .view-footer{padding:1rem 1.5rem;background:#f8fdf9;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+    .gmaps-btn{background:var(--green);color:#fff;font-size:13px;font-weight:700;padding:8px 16px;border-radius:14px;text-decoration:none}
+  </style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="sb-logo"><strong>jarkurganMMTB.uz</strong><span>Admin panel</span></div>
+  <div class="sb-menu">
+    <a href="/admin/dashboard"><span class="ic">📊</span> Dashboard</a>
+    <a href="/admin/news"><span class="ic">📰</span> Yangiliklar</a>
+    <a href="/admin/schools" class="active"><span class="ic">🏫</span> Maktablar</a>
+    <a href="/admin/documents"><span class="ic">📄</span> Hujjatlar</a>
+    <a href="/admin/contacts"><span class="ic">📩</span> Murojaatlar</a>
+    <a href="/admin/settings"><span class="ic">⚙️</span> Sozlamalar</a>
+  </div>
+  <div class="sb-bottom"><a href="/"><span>🌐</span> Saytni ko'rish</a></div>
+  <div class="sb-bottom"><a href="/logout"><span>🚪</span> Chiqish</a></div>
+</div>
+
+<div class="main">
+  <div class="topbar"><h1>🏫 Maktablar</h1></div>
+  <div class="content">
+    <div class="flash" th:if="${success}" th:text="${success}"></div>
+
+    <!-- QO'SHISH FORMASI -->
+    <div class="form-card">
+      <h2>➕ Yangi maktab qo'shish</h2>
+      <form th:action="@{/admin/schools/save}" method="post">
+        <div class="form-grid">
+          <div class="fg"><label>Raqami</label><input type="number" name="number" placeholder="1"/></div>
+          <div class="fg"><label>Nomi *</label><input type="text" name="name" required placeholder="1-son UOTM"/></div>
+          <div class="fg"><label>Manzil</label><input type="text" name="address" placeholder="Ko'cha, uy"/></div>
+          <div class="fg"><label>Telefon</label><input type="text" name="phone" placeholder="+998 77..."/></div>
+          <div class="fg"><label>Direktor</label><input type="text" name="directorName" placeholder="F.I.O"/></div>
+          <div class="fg"><label>O'quvchilar soni</label><input type="number" name="studentCount" placeholder="500"/></div>
+          <div class="fg"><label>O'qituvchilar soni</label><input type="number" name="teacherCount" placeholder="40"/></div>
+          <div class="fg">
+            <label>Turi</label>
+            <select name="type">
+              <option th:each="t : ${types}" th:value="${t}" th:text="${t}"></option>
+            </select>
+          </div>
+        </div>
+        <div class="map-section">
+          <div class="map-header">
+            <span>📍 Joylashuvni xaritadan tanlang</span>
+            <span class="map-hint">Xaritaga bosing → marker qo'yiladi</span>
+          </div>
+          <div id="picker-map" style="height:260px"></div>
+          <div class="coord-row">
+            <div class="fg"><label>Kenglik (Latitude)</label><input type="number" name="latitude" id="lat-add" step="any" placeholder="37.5100..." readonly/></div>
+            <div class="fg"><label>Uzunlik (Longitude)</label><input type="number" name="longitude" id="lng-add" step="any" placeholder="67.5640..." readonly/></div>
+            <button type="button" class="clear-btn" onclick="clearAddMarker()">✕ Tozalash</button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-green" style="margin-top:1.2rem">💾 Maktabni saqlash</button>
+      </form>
+    </div>
+
+    <!-- RO'YXAT -->
+    <div class="table-card">
+      <table>
+        <tr><th>#</th><th>Nomi</th><th>Manzil</th><th>Direktor</th><th>Turi</th><th>O'quvchi</th><th>Joylashuv</th><th>Amallar</th></tr>
+        <tr th:if="${#lists.isEmpty(schools)}">
+          <td colspan="8" style="text-align:center;color:#6b8c73;padding:2.5rem">Maktablar hali qo'shilmagan</td>
+        </tr>
+        <tr th:each="s : ${schools}">
+          <td th:text="${s.number}">1</td>
+          <td style="font-weight:600" th:text="${s.name}">Nom</td>
+          <td th:text="${s.address ?: '—'}">Manzil</td>
+          <td th:text="${s.directorName ?: '—'}">Direktor</td>
+          <td><span class="stag" th:classappend="'t-' + ${s.type}" th:text="${s.type}"></span></td>
+          <td th:text="${s.studentCount ?: '—'}">0</td>
+          <td>
+            <!-- data-* atributlari orqali (th:onclick ishlatilmaydi) -->
+            <button th:if="${s.latitude != null}" class="has-loc"
+                    th:data-lat="${s.latitude}" th:data-lng="${s.longitude}"
+                    th:data-name="${s.name}" th:data-address="${s.address ?: ''}"
+                    onclick="showMapFromBtn(this)">🗺 Ko'rish</button>
+            <span class="no-loc" th:unless="${s.latitude != null}">📍 Yo'q</span>
+          </td>
+          <td>
+            <div class="td-btns">
+              <!-- TAHRIRLASH tugmasi — data atributlari -->
+              <button class="btn btn-gold btn-sm"
+                      th:data-id="${s.id}"
+                      th:data-number="${s.number != null ? s.number : 0}"
+                      th:data-name="${s.name}"
+                      th:data-address="${s.address != null ? s.address : ''}"
+                      th:data-phone="${s.phone != null ? s.phone : ''}"
+                      th:data-director="${s.directorName != null ? s.directorName : ''}"
+                      th:data-students="${s.studentCount != null ? s.studentCount : 0}"
+                      th:data-teachers="${s.teacherCount != null ? s.teacherCount : 0}"
+                      th:data-type="${s.type != null ? s.type.name() : 'MAKTAB'}"
+                      th:data-lat="${s.latitude != null ? s.latitude : 0}"
+                      th:data-lng="${s.longitude != null ? s.longitude : 0}"
+                      th:data-hasloc="${s.latitude != null}"
+                      onclick="openEditModal(this)">✏️ Tahrir</button>
+              <!-- O'CHIRISH -->
+              <form th:action="@{/admin/schools/delete/{id}(id=${s.id})}" method="post"
+                    onsubmit="return confirm('Haqiqatan o\'chirasizmi?')">
+                <button type="submit" class="btn btn-red btn-sm">🗑 O'chir</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- TAHRIRLASH MODALI -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal edit-modal">
+    <div class="modal-head">
+      <h3>✏️ Maktabni tahrirlash</h3>
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <form id="editForm" method="post">
+      <input type="hidden" name="id" id="edit-id"/>
+      <div class="edit-grid">
+        <div class="edit-fg"><label>Raqami</label><input type="number" name="number" id="edit-number" placeholder="1"/></div>
+        <div class="edit-fg"><label>Nomi *</label><input type="text" name="name" id="edit-name" required/></div>
+        <div class="edit-fg edit-full"><label>Manzil</label><input type="text" name="address" id="edit-address"/></div>
+        <div class="edit-fg"><label>Telefon</label><input type="text" name="phone" id="edit-phone"/></div>
+        <div class="edit-fg"><label>Direktor</label><input type="text" name="directorName" id="edit-director"/></div>
+        <div class="edit-fg"><label>O'quvchilar soni</label><input type="number" name="studentCount" id="edit-students"/></div>
+        <div class="edit-fg"><label>O'qituvchilar soni</label><input type="number" name="teacherCount" id="edit-teachers"/></div>
+        <div class="edit-fg">
+          <label>Turi</label>
+          <select name="type" id="edit-type">
+            <option th:each="t : ${types}" th:value="${t}" th:text="${t}"></option>
+          </select>
+        </div>
+      </div>
+      <!-- Xarita -->
+      <div style="border-top:1px solid var(--border)">
+        <div class="map-header" style="border-bottom:1px solid var(--border)">
+          <span>📍 Joylashuvni yangilang</span>
+          <span class="map-hint">Xaritaga bosing yoki markerni suring</span>
+        </div>
+        <div id="edit-map" class="edit-map"></div>
+        <div class="edit-coords">
+          <div class="fg"><label>Kenglik</label><input type="number" name="latitude" id="edit-lat" step="any" readonly/></div>
+          <div class="fg"><label>Uzunlik</label><input type="number" name="longitude" id="edit-lng" step="any" readonly/></div>
+          <button type="button" class="clear-btn" onclick="clearEditMarker()">✕ Tozalash</button>
+        </div>
+      </div>
+      <div class="modal-footer-btns">
+        <button type="button" class="btn" style="background:#e0e0e0;color:#333" onclick="closeEditModal()">Bekor qilish</button>
+        <button type="submit" class="btn btn-green">💾 Saqlash</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- XARITA KO'RISH MODALI -->
+<div class="modal-overlay" id="viewMapModal">
+  <div class="modal view-modal">
+    <div class="modal-head">
+      <h3 id="view-modal-name">Maktab joylashuvi</h3>
+      <button class="modal-close" onclick="closeViewMap()">✕</button>
+    </div>
+    <div id="view-map"></div>
+    <div class="view-footer">
+      <p id="view-modal-addr" style="font-size:13px;color:var(--text3)"></p>
+      <a id="view-gmaps-link" href="#" target="_blank" class="gmaps-btn">🗺 Google Maps da ochish</a>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+  const JARQURGON = [37.5100, 67.5640];
+
+  // ===== QO'SHISH XARITASI =====
+  const addMap = L.map('picker-map').setView(JARQURGON, 14);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution:'© OpenStreetMap', maxZoom:19}).addTo(addMap);
+
+  const greenIcon = L.icon({
+    iconUrl:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+    shadowUrl:'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+    iconSize:[25,41],iconAnchor:[12,41],popupAnchor:[1,-34],shadowSize:[41,41]
+  });
+  const redIcon = L.icon({
+    iconUrl:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+    shadowUrl:'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+    iconSize:[25,41],iconAnchor:[12,41],popupAnchor:[1,-34],shadowSize:[41,41]
+  });
+
+  let addMarker = null;
+  addMap.on('click', function(e) {
+    const {lat, lng} = e.latlng;
+    document.getElementById('lat-add').value = lat.toFixed(7);
+    document.getElementById('lng-add').value = lng.toFixed(7);
+    if (addMarker) addMarker.setLatLng([lat,lng]);
+    else {
+      addMarker = L.marker([lat,lng], {icon:greenIcon, draggable:true}).addTo(addMap);
+      addMarker.on('dragend', ev => {
+        const p = ev.target.getLatLng();
+        document.getElementById('lat-add').value = p.lat.toFixed(7);
+        document.getElementById('lng-add').value = p.lng.toFixed(7);
+      });
+    }
+    addMarker.bindPopup('📍 Maktab joylashuvi').openPopup();
+  });
+  function clearAddMarker() {
+    if (addMarker) { addMarker.remove(); addMarker = null; }
+    document.getElementById('lat-add').value = '';
+    document.getElementById('lng-add').value = '';
+  }
+
+  // ===== TAHRIRLASH MODALI =====
+  let editMap = null, editMarker = null;
+
+  function openEditModal(btn) {
+    const d = btn.dataset;
+    document.getElementById('editForm').action = '/admin/schools/save';
+    document.getElementById('edit-id').value = d.id;
+    document.getElementById('edit-number').value = d.number != '0' ? d.number : '';
+    document.getElementById('edit-name').value = d.name;
+    document.getElementById('edit-address').value = d.address;
+    document.getElementById('edit-phone').value = d.phone;
+    document.getElementById('edit-director').value = d.director;
+    document.getElementById('edit-students').value = d.students != '0' ? d.students : '';
+    document.getElementById('edit-teachers').value = d.teachers != '0' ? d.teachers : '';
+
+    // Koordinatalar — faqat hasloc=true bo'lsa
+    const hasLoc = d.hasloc === 'true';
+    document.getElementById('edit-lat').value = hasLoc ? d.lat : '';
+    document.getElementById('edit-lng').value = hasLoc ? d.lng : '';
+
+    // Tur tanlash
+    const sel = document.getElementById('edit-type');
+    for (let i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === d.type) { sel.selectedIndex = i; break; }
+    }
+
+    document.getElementById('editModal').classList.add('open');
+
+    setTimeout(() => {
+      if (editMap) { editMap.remove(); editMap = null; editMarker = null; }
+
+      const lat = hasLoc ? parseFloat(d.lat) : JARQURGON[0];
+      const lng = hasLoc ? parseFloat(d.lng) : JARQURGON[1];
+      const zoom = hasLoc ? 16 : 14;
+
+      editMap = L.map('edit-map').setView([lat, lng], zoom);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution:'© OpenStreetMap', maxZoom:19}).addTo(editMap);
+
+      if (hasLoc) {
+        editMarker = L.marker([lat, lng], {icon:greenIcon, draggable:true}).addTo(editMap);
+        editMarker.bindPopup('📍 ' + d.name).openPopup();
+        editMarker.on('dragend', ev => {
+          const p = ev.target.getLatLng();
+          document.getElementById('edit-lat').value = p.lat.toFixed(7);
+          document.getElementById('edit-lng').value = p.lng.toFixed(7);
+        });
+      }
+
+      editMap.on('click', function(e) {
+        const {lat, lng} = e.latlng;
+        document.getElementById('edit-lat').value = lat.toFixed(7);
+        document.getElementById('edit-lng').value = lng.toFixed(7);
+        if (editMarker) editMarker.setLatLng([lat, lng]);
+        else {
+          editMarker = L.marker([lat, lng], {icon:greenIcon, draggable:true}).addTo(editMap);
+          editMarker.on('dragend', ev => {
+            const p = ev.target.getLatLng();
+            document.getElementById('edit-lat').value = p.lat.toFixed(7);
+            document.getElementById('edit-lng').value = p.lng.toFixed(7);
+          });
+        }
+        editMarker.bindPopup('📍 Yangi joylashuv').openPopup();
+      });
+    }, 150);
+  }
+
+  function clearEditMarker() {
+    if (editMarker) { editMarker.remove(); editMarker = null; }
+    document.getElementById('edit-lat').value = '';
+    document.getElementById('edit-lng').value = '';
+  }
+
+  function closeEditModal() {
+    document.getElementById('editModal').classList.remove('open');
+  }
+
+  // ===== KO'RISH MODALI =====
+  let viewMap = null;
+  function showMapFromBtn(btn) {
+    const lat = parseFloat(btn.dataset.lat);
+    const lng = parseFloat(btn.dataset.lng);
+    const name = btn.dataset.name;
+    const address = btn.dataset.address;
+
+    document.getElementById('viewMapModal').classList.add('open');
+    document.getElementById('view-modal-name').textContent = '🏫 ' + name;
+    document.getElementById('view-modal-addr').textContent = address ? '📍 ' + address : '';
+    document.getElementById('view-gmaps-link').href = 'https://www.google.com/maps?q=' + lat + ',' + lng + '&z=17';
+
+    setTimeout(() => {
+      if (viewMap) { viewMap.remove(); viewMap = null; }
+      viewMap = L.map('view-map').setView([lat, lng], 17);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution:'© OpenStreetMap', maxZoom:19}).addTo(viewMap);
+      L.marker([lat, lng], {icon:redIcon}).addTo(viewMap)
+              .bindPopup('<b>🏫 ' + name + '</b>' + (address ? '<br>📍 ' + address : '')).openPopup();
+      L.circle([lat,lng], {radius:80, color:'#1a6b3c', fillColor:'#e6f5ec', fillOpacity:0.3, weight:2}).addTo(viewMap);
+    }, 150);
+  }
+
+  function closeViewMap() {
+    document.getElementById('viewMapModal').classList.remove('open');
+  }
+
+  // Modal tashqarisiga bosganda yopiladi
+  document.getElementById('editModal').addEventListener('click', e => { if(e.target===document.getElementById('editModal')) closeEditModal(); });
+  document.getElementById('viewMapModal').addEventListener('click', e => { if(e.target===document.getElementById('viewMapModal')) closeViewMap(); });
+</script>
+</body>
+</html>

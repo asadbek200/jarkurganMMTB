@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="uz" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Sozlamalar — Admin</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--green:#1a6b3c;--green3:#e6f5ec;--gold:#c8a227;--text:#1a2a1e;--text3:#6b8c73;--white:#fff;--bg:#f0f7f3;--border:#d4e8db;--sidebar:240px}
+body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar);background:var(--green);position:fixed;top:0;left:0;height:100vh;display:flex;flex-direction:column;z-index:10}
+.sb-logo{padding:1.2rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.12)}
+.sb-logo strong{display:block;font-size:14px;font-weight:700;color:#fff}
+.sb-logo span{font-size:11px;color:rgba(255,255,255,.65)}
+.sb-menu{padding:.8rem 0;flex:1}
+.sb-menu a{display:flex;align-items:center;gap:10px;padding:.7rem 1.5rem;color:rgba(255,255,255,.82);font-size:14px;text-decoration:none;transition:background .18s}
+.sb-menu a:hover,.sb-menu a.active{background:rgba(255,255,255,.14);color:#fff}
+.sb-menu a .ic{font-size:18px;width:22px;text-align:center}
+.sb-bottom{padding:1rem 1.5rem;border-top:1px solid rgba(255,255,255,.12)}
+.sb-bottom a{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.7);font-size:13px;text-decoration:none}
+.main{margin-left:var(--sidebar);flex:1}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:.8rem 1.5rem}
+.topbar h1{font-size:17px;font-weight:700}
+.content{padding:1.5rem;max-width:860px}
+.flash{background:#e6f5ec;color:#1a6b3c;border:1px solid #b2dfcc;border-radius:10px;padding:10px 14px;font-size:14px;margin-bottom:1.2rem}
+.section{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.5rem;margin-bottom:1.2rem}
+.section h2{font-size:15px;font-weight:700;color:var(--green);margin-bottom:1.2rem;padding-bottom:.6rem;border-bottom:1px solid var(--border)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
+.fg{display:flex;flex-direction:column;gap:4px;margin-bottom:.8rem}
+label{font-size:13px;font-weight:600;color:var(--text3)}
+input,select,textarea{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;outline:none;background:#fff;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--green)}
+textarea{resize:vertical}
+.btn{padding:11px 24px;border-radius:20px;font-size:14px;font-weight:700;border:none;cursor:pointer;background:var(--green);color:#fff;transition:opacity .2s}
+.btn:hover{opacity:.88}
+@media(max-width:600px){.grid2,.grid3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="sb-logo"><strong>jarkurganMMTB.uz</strong><span>Admin panel</span></div>
+  <div class="sb-menu">
+    <a href="/admin/dashboard"><span class="ic">📊</span> Dashboard</a>
+    <a href="/admin/news"><span class="ic">📰</span> Yangiliklar</a>
+    <a href="/admin/schools"><span class="ic">🏫</span> Maktablar</a>
+    <a href="/admin/documents"><span class="ic">📄</span> Hujjatlar</a>
+    <a href="/admin/contacts"><span class="ic">📩</span> Murojaatlar</a>
+    <a href="/admin/settings" class="active"><span class="ic">⚙️</span> Sozlamalar</a>
+  </div>
+  <div class="sb-bottom"><a href="/"><span>🌐</span> Saytni ko'rish</a></div>
+  <div class="sb-bottom"><a href="/logout"><span>🚪</span> Chiqish</a></div>
+</div>
+
+<div class="main">
+  <div class="topbar"><h1>Sayt sozlamalari</h1></div>
+  <div class="content">
+    <div class="flash" th:if="${success}" th:text="${success}"></div>
+
+    <form th:action="@{/admin/settings/save}" method="post">
+
+      <!-- ASOSIY MA'LUMOTLAR -->
+      <div class="section">
+        <h2>🌐 Asosiy ma'lumotlar</h2>
+        <div class="grid2">
+          <div class="fg"><label>Sayt nomi</label><input type="text" name="siteName" th:value="${settings.siteName}"/></div>
+          <div class="fg"><label>Sarlavha</label><input type="text" name="siteTitle" th:value="${settings.siteTitle}"/></div>
+        </div>
+        <div class="fg"><label>Tavsif</label><input type="text" name="siteDescription" th:value="${settings.siteDescription}"/></div>
+        <div class="fg"><label>Bo'lim haqida matn</label><textarea name="aboutText" rows="4" th:text="${settings.aboutText}"></textarea></div>
+      </div>
+
+      <!-- ALOQA -->
+      <div class="section">
+        <h2>📞 Aloqa ma'lumotlari</h2>
+        <div class="grid2">
+          <div class="fg"><label>Telefon</label><input type="text" name="phone" th:value="${settings.phone}"/></div>
+          <div class="fg"><label>E-pochta</label><input type="email" name="email" th:value="${settings.email}"/></div>
+        </div>
+        <div class="fg"><label>Manzil</label><input type="text" name="address" th:value="${settings.address}"/></div>
+        <div class="fg"><label>Ish vaqti</label><input type="text" name="workHours" th:value="${settings.workHours}" placeholder="Dushanba–Juma: 9:00–18:00"/></div>
+      </div>
+
+      <!-- RAHBARIYAT -->
+      <div class="section">
+        <h2>👤 Rahbariyat</h2>
+        <div class="grid3">
+          <div class="fg"><label>Boshlig' ismi</label><input type="text" name="leaderName" th:value="${settings.leaderName}"/></div>
+          <div class="fg"><label>Lavozim</label><input type="text" name="leaderPosition" th:value="${settings.leaderPosition}"/></div>
+          <div class="fg"><label>Telefon</label><input type="text" name="leaderPhone" th:value="${settings.leaderPhone}"/></div>
+        </div>
+        <div class="grid3">
+          <div class="fg"><label>O'rinbosar ismi</label><input type="text" name="deputyName" th:value="${settings.deputyName}"/></div>
+          <div class="fg"><label>Lavozim</label><input type="text" name="deputyPosition" th:value="${settings.deputyPosition}"/></div>
+          <div class="fg"><label>Telefon</label><input type="text" name="deputyPhone" th:value="${settings.deputyPhone}"/></div>
+        </div>
+      </div>
+
+      <!-- STATISTIKA -->
+      <div class="section">
+        <h2>📊 Statistika (bosh sahifada ko'rinadi)</h2>
+        <div class="grid2">
+          <div class="fg"><label>Maktablar soni</label><input type="number" name="schoolCount" th:value="${settings.schoolCount}"/></div>
+          <div class="fg"><label>MTM soni</label><input type="number" name="mtmCount" th:value="${settings.mtmCount}"/></div>
+          <div class="fg"><label>O'quvchilar soni</label><input type="number" name="studentCount" th:value="${settings.studentCount}"/></div>
+          <div class="fg"><label>Pedagoglar soni</label><input type="number" name="teacherCount" th:value="${settings.teacherCount}"/></div>
+        </div>
+      </div>
+
+      <!-- IJTIMOIY TARMOQLAR -->
+      <div class="section">
+        <h2>💬 Ijtimoiy tarmoqlar</h2>
+        <div class="grid3">
+          <div class="fg"><label>Telegram</label><input type="text" name="telegram" th:value="${settings.telegram}" placeholder="@kanal_nomi"/></div>
+          <div class="fg"><label>Facebook</label><input type="text" name="facebook" th:value="${settings.facebook}" placeholder="https://facebook.com/..."/></div>
+          <div class="fg"><label>Instagram</label><input type="text" name="instagram" th:value="${settings.instagram}" placeholder="@instagram_nomi"/></div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn">💾 Barcha sozlamalarni saqlash</button>
+    </form>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="uz" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Admin kirish — jarkurganMMTB.uz</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#0f3d22,#1a6b3c);min-height:100vh;display:flex;align-items:center;justify-content:center}
+.card{background:#fff;border-radius:20px;padding:2.5rem;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.logo{text-align:center;margin-bottom:2rem}
+.logo-icon{width:64px;height:64px;background:#c8a227;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:#1a6b3c;margin:0 auto .8rem}
+.logo h2{font-size:18px;font-weight:700;color:#1a2a1e}
+.logo p{font-size:13px;color:#6b8c73;margin-top:3px}
+label{display:block;font-size:13px;font-weight:600;color:#3d5c47;margin-bottom:5px}
+input{width:100%;padding:11px 14px;border:1.5px solid #d4e8db;border-radius:10px;font-size:14px;font-family:inherit;outline:none;margin-bottom:1rem;transition:border-color .2s}
+input:focus{border-color:#1a6b3c}
+button{width:100%;background:#1a6b3c;color:#fff;font-weight:700;font-size:15px;padding:13px;border:none;border-radius:12px;cursor:pointer;transition:opacity .2s;margin-top:.5rem}
+button:hover{opacity:.88}
+.error{background:#fdecea;color:#b71c1c;border:1px solid #f5c6cb;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:1rem}
+.back{display:block;text-align:center;margin-top:1.2rem;font-size:13px;color:#6b8c73}
+.back a{color:#1a6b3c;font-weight:600}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div class="logo-icon">J</div>
+    <h2>jarkurganMMTB.uz</h2>
+    <p>Admin panel</p>
+  </div>
+  <div class="error" th:if="${param.error}">Login yoki parol noto'g'ri!</div>
+  <div class="error" style="background:#e6f5ec;color:#1a6b3c;border-color:#b2dfcc" th:if="${param.logout}">Tizimdan chiqdingiz.</div>
+  <form th:action="@{/login}" method="post">
+    <label>Login</label>
+    <input type="text" name="username" placeholder="admin" autofocus/>
+    <label>Parol</label>
+    <input type="password" name="password" placeholder="••••••••"/>
+    <button type="submit">Kirish</button>
+  </form>
+  <div class="back"><a href="/">← Saytga qaytish</a></div>
+</div>
+</body>
+</html>
